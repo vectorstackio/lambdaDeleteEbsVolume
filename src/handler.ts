@@ -10,46 +10,29 @@ import type {
 } from 'aws-lambda'
 
 
-const ec2 =
-  new EC2Client({
-    region:
-      process.env.AWS_REGION
-  })
-
+const ec2 = new EC2Client({ region: process.env.AWS_REGION })
 
 export const handler: APIGatewayProxyHandler = async (
   event
 ) => {
-
   try {
-
-    const body =
-      typeof event.body === 'string'
-        ? JSON.parse(event.body)
-        : event.body
-
-
-    const volumeId =
-      body?.volumeId
-
+    const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body
+    const { volumeId } = body
 
     if (!volumeId) {
       return {
         statusCode: 400,
         body: JSON.stringify({
-          error:
-            'volumeId is required'
+          error: 'volumeId is required'
         })
       }
     }
-
 
     await ec2.send(
       new DeleteVolumeCommand({
         VolumeId: volumeId
       })
     )
-
 
     return {
       statusCode: 200,
@@ -58,23 +41,12 @@ export const handler: APIGatewayProxyHandler = async (
         volumeId
       })
     }
-
-  } catch (error) {
-
-    console.error(
-      'Failed to delete EBS volume',
-      error
-    )
-
+  } catch (err) {
+    console.error('Error in deleteEbsVolumeLambda:', err)
 
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Unknown error'
-      })
+      body: JSON.stringify({ error: 'Internal server error in deleteEbsVolumeLambda' })
     }
   }
 }
