@@ -41,8 +41,8 @@ export const handler: APIGatewayProxyHandler = async (
         volumeId
       })
     }
-  } catch (err) {
-    console.error('Error in deleteEbsVolumeLambda:', err)
+  } catch {
+    console.error('Error in deleteEbsVolumeLambda')
 
     return {
       statusCode: 500,
